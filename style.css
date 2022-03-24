@@ -1,0 +1,39 @@
+:root {
+  --game-core-size-cell: 64
+}
+
+body {
+  margin: 0;
+  background-color: teal;
+}
+
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  position: relative;
+}
+
+.cell {
+  width: calc(var(--game-core-size-cell) * 1px);
+  height: calc(var(--game-core-size-cell) * 1px);
+
+  position: absolute;
+  background-image: url("assets/images/dirt-raw.jpg");
+  background-size: calc(var(--game-core-size-cell) * 1px);
+  background-repeat: no-repeat;
+}
+
+.cell.grid {
+  border: solid 1px rgba(0, 0, 0, 0.21);
+}
+
+.player {
+  width: calc(var(--game-core-size-cell) * 1px);
+  height: calc(var(--game-core-size-cell) * 1px);
+
+  position: absolute;
+  background-color: #7d8383;
+  z-index: 1;
+}
