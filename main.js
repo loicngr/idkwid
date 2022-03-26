@@ -1,6 +1,16 @@
+/** CSS */
+import './reset.css'
 import './style.css'
-import { Game } from './Game.js'
 
-const game = new Game()
+/** JS */
+import { Game } from './core/Game.js'
+import {State} from "./core/State.js";
 
-game.init()
+(async () => {
+    const game = new Game()
+    const state = new State()
+
+    state.gameInstance = game
+
+    await game.init()
+})()

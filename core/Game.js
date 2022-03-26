@@ -1,59 +1,11 @@
-class Position {
-    constructor(x = 0, y = 0) {
-        this._x = x
-        this._y = y
-    }
-
-    get x() {
-        return this._x
-    }
-
-    set x(x) {
-        this._x = x
-    }
-
-    get y() {
-        return this._y
-    }
-
-    set y(y) {
-        this._y = y
-    }
-}
-
-class Player {
-    constructor(id, position, domElement) {
-        this._id = id
-        this._position = position
-        this._domElement = domElement
-    }
-
-    get id () {
-        return this._id
-    }
-
-    setPositionX (x, reDraw = true) {
-        this._position.x = x
-
-        if (reDraw)
-            this.domElement.style.left = `${this._position.x}px`
-    }
-
-    setPositionY (y, reDraw = true) {
-        this._position.y = y
-
-        if (reDraw)
-            this.domElement.style.top = `${this._position.y}px`
-    }
-
-    get position () {
-        return this._position
-    }
-
-    get domElement () {
-        return this._domElement
-    }
-}
+import {Position} from "./Position.js";
+import {
+    Player,
+    PLAYER_DIRECTION_IDLE_UP,
+    PLAYER_DIRECTION_IDLE_LEFT,
+    PLAYER_DIRECTION_IDLE_DOWN,
+    PLAYER_DIRECTION_IDLE_RIGHT
+} from "./Player.js";
 
 export class Game {
     /**
@@ -67,29 +19,28 @@ export class Game {
 
         this._player = new Player(1, new Position(), document.createElement('div'))
         this._SIZE_CELL = 0
-        this._SIZE_WINDOW = { x: (window.innerWidth - 150), y: (window.innerHeight - 150) }
+        this._SIZE_WINDOW = { x: window.innerWidth, y: window.innerHeight }
 
+        this._isDev = import.meta.env.DEV
         this._config = {}
     }
 
     /**
      * Initialise basics
      */
-   init(withDraw = true) {
-        this._importConfig()
-            .then((config) => {
-                this._config = config
+   async init(withDraw = true) {
+        // const config = await this._importConfig()
+        // if (!config)
+        //     throw new Error("Can't find config file")
+        //
+        // this._config = config
 
-                this._getValuesFromCSS()
-                this._generateLevels()
-                this._initEventsListeners()
+        this._getValuesFromCSS()
+        this._generateLevels()
+        this._initEventsListeners()
 
-                if (withDraw)
-                    this.draw()
-            })
-            .catch(() => {
-                throw new Error("Can't find config file")
-            })
+        if (withDraw)
+            this.draw()
     }
 
     get levels() {
@@ -101,7 +52,7 @@ export class Game {
     }
 
     get isDev() {
-       return this._config.env === 'dev'
+       return this._isDev
     }
 
     /**
@@ -134,10 +85,13 @@ export class Game {
      * @private
      */
     _generateLevels() {
-        for (let y = 0; y <= this._SIZE_WINDOW.y; y += this._SIZE_CELL) {
+        const maxY = this._SIZE_WINDOW.y - this._SIZE_CELL
+        const maxX = this._SIZE_WINDOW.x - this._SIZE_CELL
+
+        for (let y = 0; y < maxY; y += this._SIZE_CELL) {
             this._levels[y] = []
 
-            for (let x = 0; x <= this._SIZE_WINDOW.x; x += this._SIZE_CELL) {
+            for (let x = 0; x < maxX; x += this._SIZE_CELL) {
                 this._levels[y][x] = { position: new Position(x, y) }
             }
         }
@@ -184,6 +138,11 @@ export class Game {
         divElement.setAttribute('x', player.position.x)
         divElement.setAttribute('y', player.position.y)
         divElement.classList.add('player')
+
+        player.directionClasses.forEach(_class => {
+            divElement.classList.add(_class)
+        })
+
         divElement.style.left = `${player.position.x}px`
         divElement.style.top = `${player.position.y}px`
 
@@ -204,6 +163,7 @@ export class Game {
             case 'ArrowRight': {
                 const newPlayerX = currentPlayer.position.x + this._SIZE_CELL
                 if (this._levels[currentPlayer.position.y][newPlayerX]) {
+                    this.player.direction = PLAYER_DIRECTION_IDLE_RIGHT
                     this.player.setPositionX(newPlayerX)
                 }
                 break
@@ -211,6 +171,7 @@ export class Game {
             case 'ArrowLeft': {
                 const newPlayerX = currentPlayer.position.x - this._SIZE_CELL
                 if (this._levels[currentPlayer.position.y][newPlayerX]) {
+                    this.player.direction = PLAYER_DIRECTION_IDLE_LEFT
                     this.player.setPositionX(newPlayerX)
                 }
                 break
@@ -218,6 +179,7 @@ export class Game {
             case 'ArrowUp': {
                 const newPlayerY = currentPlayer.position.y - this._SIZE_CELL
                 if (this._levels[newPlayerY]) {
+                    this.player.direction = PLAYER_DIRECTION_IDLE_UP
                     this.player.setPositionY(newPlayerY)
                 }
                 break
@@ -225,6 +187,7 @@ export class Game {
             case 'ArrowDown': {
                 const newPlayerY = currentPlayer.position.y + this._SIZE_CELL
                 if (this._levels[newPlayerY]) {
+                    this.player.direction = PLAYER_DIRECTION_IDLE_DOWN
                     this.player.setPositionY(newPlayerY)
                 }
                 break
@@ -232,13 +195,16 @@ export class Game {
             default:
                 return
         }
+
+        this.player.updateDirection()
     }
 
-    // _onWindowResize() {
-    //     this._SIZE_WINDOW = { x: window.innerWidth, y: window.innerHeight }
-    //
-    //     this._drawLevels()
-    // }
+    _onWindowResize() {
+        this._SIZE_WINDOW = { x: window.innerWidth, y: window.innerHeight }
+
+        // this._generateLevels()
+        // this._drawLevels()
+    }
 
     /**
      * Init events listeners
@@ -247,7 +213,7 @@ export class Game {
      */
     _initEventsListeners() {
         document.addEventListener('keydown', (e) => this._onKeyDown(e))
-        // window.addEventListener('resize', (e) => this._onWindowResize(e));
+        window.addEventListener('resize', (e) => this._onWindowResize(e));
     }
 
     /**
