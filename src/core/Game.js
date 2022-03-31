@@ -1,11 +1,12 @@
-import {Position} from './Position.js'
+import {Position} from './Position'
 import {
   Player,
   PLAYER_DIRECTION_IDLE_UP,
   PLAYER_DIRECTION_IDLE_LEFT,
   PLAYER_DIRECTION_IDLE_DOWN,
   PLAYER_DIRECTION_IDLE_RIGHT
-} from './Player.js'
+} from './Player'
+import {GLOBAL_VARIABLES_LIST, VARIABLE_SIZE_CELL} from '../consts'
 
 export class Game {
   /**
@@ -17,9 +18,21 @@ export class Game {
     this._levels = []
 
     this._player = new Player(1, new Position(), document.createElement('div'))
-    this._SIZE_CELL = 0
-    this._SIZE_WINDOW = { x: window.innerWidth, y: window.innerHeight }
 
+    // Init class globals variables for CSS
+    for (const globalVariablesListKey in GLOBAL_VARIABLES_LIST) {
+      const item = GLOBAL_VARIABLES_LIST[globalVariablesListKey]
+
+      if (item.jsRef === undefined)
+        throw new Error(`jsRef for "${JSON.stringify(item)}" not found !`)
+
+      if (this[item.value] === undefined)
+        item.value = null
+
+      this[item.jsRef] = item.value
+    }
+
+    this._SIZE_WINDOW = { x: window.innerWidth, y: window.innerHeight }
     this._isDev = import.meta.env.DEV
   }
 
@@ -53,8 +66,21 @@ export class Game {
      * @private
      */
   _getValuesFromCSS() {
-    this._SIZE_CELL = parseInt(getComputedStyle(document.documentElement)
-      .getPropertyValue('--game-core-size-cell'))
+    const _document = getComputedStyle(document.documentElement)
+    for (const globalVariablesListKey in GLOBAL_VARIABLES_LIST) {
+      const item = GLOBAL_VARIABLES_LIST[globalVariablesListKey]
+
+      if (this[item.jsRef] === undefined)
+        throw new Error(`jsRef "${item.jsRef}" not found !`)
+
+      if (item.cssRef === undefined || item.cssRef === '')
+        throw new Error(`cssRef for "${item.jsRef}" not found !`)
+
+      if (item.cssFormat === undefined || typeof item.cssFormat !== 'function')
+        throw new Error('cssFormat is not a function !')
+
+      this[item.jsRef] = item.cssFormat(_document.getPropertyValue(`--${item.cssRef}`))
+    }
   }
 
   /**
@@ -63,13 +89,13 @@ export class Game {
      * @private
      */
   _generateLevels() {
-    const maxY = this._SIZE_WINDOW.y - this._SIZE_CELL
-    const maxX = this._SIZE_WINDOW.x - this._SIZE_CELL
+    const maxY = this._SIZE_WINDOW.y - this[VARIABLE_SIZE_CELL]
+    const maxX = this._SIZE_WINDOW.x - this[VARIABLE_SIZE_CELL]
 
-    for (let y = 0; y < maxY; y += this._SIZE_CELL) {
+    for (let y = 0; y < maxY; y += this[VARIABLE_SIZE_CELL]) {
       this._levels[y] = []
 
-      for (let x = 0; x < maxX; x += this._SIZE_CELL) {
+      for (let x = 0; x < maxX; x += this[VARIABLE_SIZE_CELL]) {
         this._levels[y][x] = { position: new Position(x, y) }
       }
     }
@@ -139,7 +165,7 @@ export class Game {
 
     switch (keyboardEvent.code) {
     case 'ArrowRight': {
-      const newPlayerX = currentPlayer.position.x + this._SIZE_CELL
+      const newPlayerX = currentPlayer.position.x + this[VARIABLE_SIZE_CELL]
       if (this._levels[currentPlayer.position.y][newPlayerX]) {
         this.player.direction = PLAYER_DIRECTION_IDLE_RIGHT
         this.player.setPositionX(newPlayerX)
@@ -147,7 +173,7 @@ export class Game {
       break
     }
     case 'ArrowLeft': {
-      const newPlayerX = currentPlayer.position.x - this._SIZE_CELL
+      const newPlayerX = currentPlayer.position.x - this[VARIABLE_SIZE_CELL]
       if (this._levels[currentPlayer.position.y][newPlayerX]) {
         this.player.direction = PLAYER_DIRECTION_IDLE_LEFT
         this.player.setPositionX(newPlayerX)
@@ -155,7 +181,7 @@ export class Game {
       break
     }
     case 'ArrowUp': {
-      const newPlayerY = currentPlayer.position.y - this._SIZE_CELL
+      const newPlayerY = currentPlayer.position.y - this[VARIABLE_SIZE_CELL]
       if (this._levels[newPlayerY]) {
         this.player.direction = PLAYER_DIRECTION_IDLE_UP
         this.player.setPositionY(newPlayerY)
@@ -163,7 +189,7 @@ export class Game {
       break
     }
     case 'ArrowDown': {
-      const newPlayerY = currentPlayer.position.y + this._SIZE_CELL
+      const newPlayerY = currentPlayer.position.y + this[VARIABLE_SIZE_CELL]
       if (this._levels[newPlayerY]) {
         this.player.direction = PLAYER_DIRECTION_IDLE_DOWN
         this.player.setPositionY(newPlayerY)
@@ -175,6 +201,13 @@ export class Game {
     }
 
     this.player.updateDirection()
+    this._update()
+  }
+
+  _update () {
+    const { player: { position: pPosition } } = this
+
+    console.log(pPosition)
   }
 
   _onWindowResize() {
