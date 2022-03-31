@@ -19,7 +19,7 @@ body {
   height: calc(var(--game-core-size-cell) * 1px);
 
   position: absolute;
-  background-image: url("assets/images/dirt-raw.jpg");
+  background-image: url("../images/dirt-raw.jpg");
   background-size: calc(var(--game-core-size-cell) * 1px);
   background-repeat: no-repeat;
 }
@@ -42,17 +42,17 @@ body {
 }
 
 .player.idle.down {
-  background-image: url("assets/images/player/idleDown.png");
+  background-image: url("../images/player/idleDown.png");
 }
 
 .player.idle.left {
-  background-image: url("assets/images/player/idleLeft.png");
+  background-image: url("../images/player/idleLeft.png");
 }
 
 .player.idle.right {
-  background-image: url("assets/images/player/idleRight.png");
+  background-image: url("../images/player/idleRight.png");
 }
 
 .player.idle.up {
-  background-image: url("assets/images/player/idleUp.png");
+  background-image: url("../images/player/idleUp.png");
 }
