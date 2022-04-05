@@ -207,7 +207,23 @@ export class Game {
   _update () {
     const { player: { position: pPosition } } = this
 
-    console.log(pPosition)
+    console.log(pPosition.x)
+    // can update levels view here
+  }
+
+  /**
+   * Call with `requestAnimationFrame`
+   *
+   * @param {number} delta
+   * @param {number} time
+   *
+   * @public
+   */
+  execute (delta, time) {
+    const { player: { position: pPosition } } = this
+
+    console.log(pPosition, delta, time)
+    this._drawLevels()
   }
 
   _onWindowResize() {
