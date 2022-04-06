@@ -1,54 +1,22 @@
 body {
-  background-color: #7c5050;
+    background: teal;
 }
 
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+body main {
+    display: flex;
 
-  position: relative;
+    align-items: center;
+    justify-content: center;
 }
 
-.cell {
-  width: calc(var(--game-core-size-cell) * 1px);
-  height: calc(var(--game-core-size-cell) * 1px);
+#game {
+    width: 512px;
+    height: 512px;
 
-  position: absolute;
-  background-image: url("../images/dirt-raw.jpg");
-  background-size: calc(var(--game-core-size-cell) * 1px);
-  background-repeat: no-repeat;
+    position: relative;
+    top: calc(50vh - 250px);
 }
 
-.cell.grid {
-  outline: 2px solid rgba(0, 0, 0, 0.21);
-}
-
-.player {
-  width: calc(var(--game-core-size-cell) * 1px);
-  height: calc(var(--game-core-size-cell) * 1px);
-
-  position: absolute;
-
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  z-index: 1;
-}
-
-.player.idle.down {
-  background-image: url("../images/player/idleDown.png");
-}
-
-.player.idle.left {
-  background-image: url("../images/player/idleLeft.png");
-}
-
-.player.idle.right {
-  background-image: url("../images/player/idleRight.png");
-}
-
-.player.idle.up {
-  background-image: url("../images/player/idleUp.png");
+canvas {
+    border: 1px solid black;
 }
